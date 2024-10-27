@@ -1,34 +1,24 @@
-# main.py
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
-import crud, models, ai_model
-from database import get_db
+from database import get_db  # Importar função para obter sessão do banco de dados
+from crud import load_data  # Sua função de carregamento de dados
+from predict_model import predict_delay  # Função de previsão do modelo treinado
 
 app = FastAPI()
 
+@app.get("/predict_delay/{cod_version}")
+def predict(cod_version: int, db: Session = Depends(get_db)):
+    # Passo 1: Carregar dados
+    version_data = load_data(db)
 
-# Endpoint para fazer previsões de atraso por projeto
-@app.get("/projects/{cod_project}/predict")
-def predict_project_delay(cod_project: int, db: Session = Depends(get_db)):
-    # Obter as issues do projeto
-    issues = crud.get_issues_by_project(db, cod_project)
+    # Passo 2: Filtrar dados para a versão especificada
+    version_info = version_data[version_data['cod_version'] == cod_version]
 
-    if not issues:
-        raise HTTPException(status_code=404, detail="No issues found for this project")
+    # Passo 3: Executar previsão do modelo
+    delay_risk = predict_delay(version_info)
 
-    # Fazer a previsão com o modelo de IA
-    # predictions = ai_model.predict_delay(issues)
-
-    # return {"project": cod_project, "predictions": predictions.tolist()}
-    return {"project": cod_project, "predictions": [1, 2, 3]}
-
-# Endpoint básico para buscar todas as issues de um projeto específico
-@app.get("/projects/{cod_project}/issues")
-def get_issues_by_project(cod_project: int, db: Session = Depends(get_db)):
-    # Buscar todas as issues associadas ao cod_project
-    issues = crud.get_issues_by_project(db, cod_project)
-
-    if not issues:
-        raise HTTPException(status_code=404, detail="No issues found for this project")
-
-    return issues
+    # Passo 4: Retornar resposta
+    return {
+        "version_id": cod_version,
+        "delay_risk_percentage": delay_risk
+    }
