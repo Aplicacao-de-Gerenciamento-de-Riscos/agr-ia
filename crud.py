@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from models import Issue, Sprint, VersionIssue, Version, Project
 import pandas as pd
 
+# Função para carregar os dados do banco de dados
 def load_data(db: Session):
     # Carregar sprints e projetos com uma única consulta
     projects_with_sprints = (db.query(Project.cod_project, Project.key, Sprint.cod_sprint, Sprint.name)
