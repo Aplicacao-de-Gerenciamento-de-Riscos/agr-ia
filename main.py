@@ -20,7 +20,7 @@ def predict_delay(version_data):
     model = load_trained_model()
 
     # Obtenha a probabilidade de atraso
-    delay_risk_percentage = float(model.predict_proba(version_data)[0][1]) * 100  # Converte para float
+    delay_risk_percentage = round(float(model.predict_proba(version_data)[0][1]) * 100, 1)  # Converte para float
 
     return delay_risk_percentage
 
@@ -37,16 +37,20 @@ def get_predict_delay(version_ids: str):
 
     delay_risk_percentage = []
 
+    version_data_all = load_data(db)
+
     for version_id in version_id_list:
         # Carregar os dados da versão específica em formato de DataFrame
-        version_data = load_data(db)
-        version_data = version_data[version_data['cod_version'] == version_id].drop(columns=['cod_version', 'cod_project'])
+        version_data = version_data_all[version_data_all['cod_version'] == version_id].drop(columns=['cod_version', 'cod_project'])
 
         # Fazer a predição e obter o risco e épicos que mais impactam
-        delay_risk_percentage.append({
-            "version_id": version_id,
-            "delay_risk_percentage": predict_delay(version_data)
-        })
+        try:
+            delay_risk_percentage.append({
+                "version_id": version_id,
+                "delay_risk_percentage": predict_delay(version_data)
+            })
+        except Exception as e:
+            continue
 
     return delay_risk_percentage
 

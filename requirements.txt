@@ -7,3 +7,5 @@ python-dotenv  # Para gerenciar variáveis de ambiente
 joblib
 scikit-learn
 numpy
+pandas
+xgboost
