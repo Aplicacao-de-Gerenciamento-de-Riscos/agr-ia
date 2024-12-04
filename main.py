@@ -42,7 +42,6 @@ def predict_delay(version_data):
     print("Probabilidade de Atraso:", delay_risk_percentage)
     return delay_risk_percentage
 
-
 @app.get("/predict-delay")
 def get_predict_delay(version_ids: str):
     # Converter a string 'id1,id2,id3' em uma lista de inteiros
@@ -88,7 +87,6 @@ def get_predict_delay(version_ids: str):
             continue
 
     return delay_risk_percentage
-
 
 # Exemplo de uso
 if __name__ == "__main__":
